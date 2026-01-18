@@ -54,6 +54,11 @@ app.post('/api/persons', (req, res) => {
       error: 'name or number is missing' 
     })
   }
+  if(contacts.find(person => person.name === req.body.name)){
+    return res.status(400).json({ 
+      error: 'name must be unique' 
+    })
+  }
     const id = Math.round(Math.random() * 1000)
     const newContact = {
       'id' : `${id}`, 
