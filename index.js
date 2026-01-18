@@ -49,9 +49,19 @@ app.get('/info', (req, res) => {
 })
 
 app.post('/api/persons', (req, res) => {
-    console.log(req.body);
-    contacts.concat(req.body)
-    res.json(req.body)
+  if (!req.body.name || !req.body.number) {
+    return res.status(400).json({ 
+      error: 'name or number is missing' 
+    })
+  }
+    const id = Math.round(Math.random() * 1000)
+    const newContact = {
+      'id' : `${id}`, 
+      'name' : req.body.name,
+      'number' : req.body.number
+    }
+    contacts = contacts.concat(newContact)
+    res.json(newContact)
 })
 
 app.delete('/api/persons/:id', (req, res) => {
