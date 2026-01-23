@@ -1,7 +1,10 @@
 const express = require('express')
 const morgan = require('morgan')
+const cors = require('cors')
 const app = express()
 const port = 3001
+
+app.use(cors())
 
 app.use(express.json())
 morgan.token('reqBody', function (req, res) { return JSON.stringify(req.body) })
@@ -35,10 +38,10 @@ contacts = [
     }
 ]
 
-app.get('/api/persons', (req, res) => {
+app.get('/persons', (req, res) => {
   res.send(contacts)
 })
-app.get('/api/persons/:id', (req, res) => {
+app.get('/persons/:id', (req, res) => {
     const id = req.params.id
     const person = contacts.find(contact => contact.id === id)
     if(person){
@@ -56,7 +59,7 @@ app.get('/info', (req, res) => {
     console.log(res);
 })
 
-app.post('/api/persons', (req, res) => {
+app.post('/persons', (req, res) => {
   if (!req.body.name || !req.body.number) {
     return res.status(400).json({ 
       error: 'name or number is missing' 
@@ -77,7 +80,7 @@ app.post('/api/persons', (req, res) => {
     res.json(newContact)
 })
 
-app.delete('/api/persons/:id', (req, res) => {
+app.delete('/persons/:id', (req, res) => {
     const id = req.params.id
     contacts = contacts.filter(contact => contact.id !== id)
     res.status(204).end()
