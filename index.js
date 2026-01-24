@@ -1,91 +1,105 @@
-const express = require('express')
-const morgan = require('morgan')
-const cors = require('cors')
-const app = express()
-const PORT = process.env.PORT || 3001
+const express = require("express");
+const morgan = require("morgan");
+const cors = require("cors");
+const app = express();
+const PORT = process.env.PORT || 3001;
 
-app.use(cors())
+app.use(cors());
+app.use(express.json());
+app.use(express.static("dist"));
 
-app.use(express.json())
-morgan.token('reqBody', function (req, res) { return JSON.stringify(req.body) })
-app.use(morgan('tiny', {
-  skip: function (req, res) { return req.method==='POST'; }
-}))
-app.use(morgan(':method :url :status :res[content-length] - :response-time ms :reqBody', {
-  skip: function (req, res) { return req.method!=='POST'; }
-}))
+morgan.token("reqBody", function (req, res) {
+  return JSON.stringify(req.body);
+});
+app.use(
+  morgan("tiny", {
+    skip: function (req, res) {
+      return req.method === "POST";
+    },
+  })
+);
+app.use(
+  morgan(
+    ":method :url :status :res[content-length] - :response-time ms :reqBody",
+    {
+      skip: function (req, res) {
+        return req.method !== "POST";
+      },
+    }
+  )
+);
 
 contacts = [
-    { 
-      "id": "1",
-      "name": "Arto Hellas", 
-      "number": "040-123456"
-    },
-    { 
-      "id": "2",
-      "name": "Ada Lovelace", 
-      "number": "39-44-5323523"
-    },
-    { 
-      "id": "3",
-      "name": "Dan Abramov", 
-      "number": "12-43-234345"
-    },
-    { 
-      "id": "4",
-      "name": "Mary Poppendieck", 
-      "number": "39-23-6423122"
-    }
-]
+  {
+    id: "1",
+    name: "Arto Hellas",
+    number: "040-123456",
+  },
+  {
+    id: "2",
+    name: "Ada Lovelace",
+    number: "39-44-5323523",
+  },
+  {
+    id: "3",
+    name: "Dan Abramov",
+    number: "12-43-234345",
+  },
+  {
+    id: "4",
+    name: "Mary Poppendieck",
+    number: "39-23-6423122",
+  },
+];
 
-app.get('/persons', (req, res) => {
-  res.send(contacts)
-})
-app.get('/persons/:id', (req, res) => {
-    const id = req.params.id
-    const person = contacts.find(contact => contact.id === id)
-    if(person){
-        res.send(person)
-    }else{
-        res.status(404).send("Sorry can't find that!")
-    }
-  })
+app.get("/persons", (req, res) => {
+  res.send(contacts);
+});
+app.get("/persons/:id", (req, res) => {
+  const id = req.params.id;
+  const person = contacts.find((contact) => contact.id === id);
+  if (person) {
+    res.send(person);
+  } else {
+    res.status(404).send("Sorry can't find that!");
+  }
+});
 
-app.get('/info', (req, res) => {
-    const length = Object.keys(contacts).length
-    const currentDate = new Date()
-    const message = `Phonebook currently has ${length} people`
-    res.send(`${message} <br/> ${currentDate}`)
-    console.log(res);
-})
+app.get("/info", (req, res) => {
+  const length = Object.keys(contacts).length;
+  const currentDate = new Date();
+  const message = `Phonebook currently has ${length} people`;
+  res.send(`${message} <br/> ${currentDate}`);
+  console.log(res);
+});
 
-app.post('/persons', (req, res) => {
+app.post("/persons", (req, res) => {
   if (!req.body.name || !req.body.number) {
-    return res.status(400).json({ 
-      error: 'name or number is missing' 
-    })
+    return res.status(400).json({
+      error: "name or number is missing",
+    });
   }
-  if(contacts.find(person => person.name === req.body.name)){
-    return res.status(400).json({ 
-      error: 'name must be unique' 
-    })
+  if (contacts.find((person) => person.name === req.body.name)) {
+    return res.status(400).json({
+      error: "name must be unique",
+    });
   }
-    const id = Math.round(Math.random() * 1000)
-    const newContact = {
-      'id' : `${id}`, 
-      'name' : req.body.name,
-      'number' : req.body.number
-    }
-    contacts = contacts.concat(newContact)
-    res.json(newContact)
-})
+  const id = Math.round(Math.random() * 1000);
+  const newContact = {
+    id: `${id}`,
+    name: req.body.name,
+    number: req.body.number,
+  };
+  contacts = contacts.concat(newContact);
+  res.json(newContact);
+});
 
-app.delete('/persons/:id', (req, res) => {
-    const id = req.params.id
-    contacts = contacts.filter(contact => contact.id !== id)
-    res.status(204).end()
-})
+app.delete("/persons/:id", (req, res) => {
+  const id = req.params.id;
+  contacts = contacts.filter((contact) => contact.id !== id);
+  res.status(204).end();
+});
 
 app.listen(PORT, () => {
-  console.log(`App listening on port ${PORT}`)
-})
+  console.log(`App listening on port ${PORT}`);
+});
