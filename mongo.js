@@ -20,12 +20,22 @@ const contactSchema = new mongoose.Schema({
 
 const Contact = mongoose.model("Contact", contactSchema);
 
-const contact = new Contact({
-  name: process.argv[3],
-  number: process.argv[4],
-});
+if (process.argv[3] && process.argv[4]) {
+  const contact = new Contact({
+    name: process.argv[3],
+    number: process.argv[4],
+  });
 
-contact.save().then((result) => {
-  console.log("contact saved!");
-  mongoose.connection.close();
-});
+  contact.save().then((result) => {
+    console.log(
+      `added ${process.argv[3]} number ${process.argv[4]} to phonebook`
+    );
+    mongoose.connection.close();
+  });
+} else {
+  Contact.find({}).then((persons) => {
+    persons.forEach((person) => {
+      console.log(person);
+    });
+  });
+}
