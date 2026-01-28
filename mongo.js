@@ -11,6 +11,8 @@ const url = `mongodb+srv://renner_db_phonebook:${password}@cluster0.5yaf6vd.mong
 
 mongoose.set('strictQuery',false)
 
+mongoose.connect(url, { family: 4 })
+
 const contactSchema = new mongoose.Schema({
     name: String,
     number: String,
@@ -19,8 +21,8 @@ const contactSchema = new mongoose.Schema({
 const Contact = mongoose.model('Contact', contactSchema)
 
 const contact = new Contact({
-    name: 'Test',
-    number: '212-212-2121'
+    name: process.argv[3],
+    number: process.argv[4]
   })
 
   contact.save().then(result => {
