@@ -36,6 +36,7 @@ if (process.argv[3] && process.argv[4]) {
   Contact.find({}).then((persons) => {
     persons.forEach((person) => {
       console.log(person);
+      mongoose.connection.close()
     });
   });
 }
