@@ -1,8 +1,10 @@
+require("dotenv").config();
+const Contact = require("./models/contact");
 const express = require("express");
 const morgan = require("morgan");
 const cors = require("cors");
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT;
 
 app.use(cors());
 app.use(express.json());
@@ -29,40 +31,37 @@ app.use(
   )
 );
 
-contacts = [
-  {
-    id: "1",
-    name: "Arto Hellas",
-    number: "040-123456",
-  },
-  {
-    id: "2",
-    name: "Ada Lovelace",
-    number: "39-44-5323523",
-  },
-  {
-    id: "3",
-    name: "Dan Abramov",
-    number: "12-43-234345",
-  },
-  {
-    id: "4",
-    name: "Mary Poppendieck",
-    number: "39-23-6423122",
-  },
-];
+// contacts = [
+//   {
+//     id: "1",
+//     name: "Arto Hellas",
+//     number: "040-123456",
+//   },
+//   {
+//     id: "2",
+//     name: "Ada Lovelace",
+//     number: "39-44-5323523",
+//   },
+//   {
+//     id: "3",
+//     name: "Dan Abramov",
+//     number: "12-43-234345",
+//   },
+//   {
+//     id: "4",
+//     name: "Mary Poppendieck",
+//     number: "39-23-6423122",
+//   },
+// ];
 
-app.get("/persons", (req, res) => {
-  res.send(contacts);
+app.get("/api/persons", (req, res) => {
+  Contact.find({}).then((person) => res.json(person));
 });
-app.get("/persons/:id", (req, res) => {
-  const id = req.params.id;
-  const person = contacts.find((contact) => contact.id === id);
-  if (person) {
-    res.send(person);
-  } else {
-    res.status(404).send("Sorry can't find that!");
-  }
+
+app.get("/api/persons/:id", (req, res) => {
+  Contact.findById(req.params.id).then((contact) => {
+    res.json(contact);
+  });
 });
 
 app.get("/info", (req, res) => {
@@ -73,31 +72,27 @@ app.get("/info", (req, res) => {
   console.log(res);
 });
 
-app.post("/persons", (req, res) => {
-  if (!req.body.name || !req.body.number) {
-    return res.status(400).json({
-      error: "name or number is missing",
-    });
+app.post("/api/persons", (req, res) => {
+  const body = req.body;
+
+  if (!body.name || !body.number) {
+    return res.status(400).json({ error: "content missing" });
   }
-  if (contacts.find((person) => person.name === req.body.name)) {
-    return res.status(400).json({
-      error: "name must be unique",
-    });
-  }
-  const id = Math.round(Math.random() * 1000);
-  const newContact = {
-    id: `${id}`,
+
+  const contact = new Contact({
     name: req.body.name,
     number: req.body.number,
-  };
-  contacts = contacts.concat(newContact);
-  res.json(newContact);
+  });
+
+  contact.save().then((savedContact) => {
+    res.json(savedContact);
+  });
 });
 
-app.delete("/persons/:id", (req, res) => {
-  const id = req.params.id;
-  contacts = contacts.filter((contact) => contact.id !== id);
-  res.status(204).end();
+app.delete("/api/persons/:id", (req, res) => {
+  Contact.findByIdAndDelete(req.params.id)
+    .then((result) => res.status(204).end())
+    .catch((error) => next(error));
 });
 
 app.listen(PORT, () => {
