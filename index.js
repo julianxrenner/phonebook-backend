@@ -59,9 +59,18 @@ app.get("/api/persons", (req, res) => {
 });
 
 app.get("/api/persons/:id", (req, res) => {
-  Contact.findById(req.params.id).then((contact) => {
-    res.json(contact);
-  });
+  Contact.findById(req.params.id)
+  .then(contact => {
+    if (contact) {
+      res.json(contact)
+    } else {
+      res.status(404).end()
+    }
+  })
+  .catch(error => {
+    console.log(error)
+    res.status(500).end()
+  })
 });
 
 app.get("/info", (req, res) => {
