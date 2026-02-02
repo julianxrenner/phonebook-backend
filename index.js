@@ -32,21 +32,23 @@ app.use(
 );
 
 const unknownEndpoint = (req, res) => {
-  res.status(404).send({ error: 'unknown endpoint' })
-}
+  res.status(404).send({ error: "unknown endpoint" });
+};
 
 const errorHandler = (error, req, res, next) => {
-  console.error(error.message)
+  console.error(error.message);
 
-  if (error.name === 'CastError') {
-    return res.status(400).send({ error: 'malformatted id' })
-  } 
+  if (error.name === "CastError") {
+    return res.status(400).send({ error: "malformatted id" });
+  }
 
-  next(error)
-}
+  next(error);
+};
 
 app.get("/api/persons", (req, res) => {
-  Contact.find({}).then((person) => res.json(person));
+  Contact.find({}).then((person) => {
+    res.json(person);
+  });
 });
 
 app.get("/api/persons/:id", (req, res, next) => {
@@ -62,11 +64,17 @@ app.get("/api/persons/:id", (req, res, next) => {
 });
 
 app.get("/info", (req, res) => {
-  const length = Object.keys(contacts).length;
-  const currentDate = new Date();
-  const message = `Phonebook currently has ${length} people`;
-  res.send(`${message} <br/> ${currentDate}`);
-  console.log(res);
+  let length = 0;
+  Contact.find({})
+    .then((people) => {
+      length = people.length;
+    })
+    .then((result) => {
+      const currentDate = new Date();
+      const message = `Phonebook currently has ${length} people`;
+      res.send(`${message} <br/> ${currentDate}`);
+      console.log(res);
+    });
 });
 
 app.post("/api/persons", (req, res) => {
@@ -103,8 +111,8 @@ app.delete("/api/persons/:id", (req, res, next) => {
     .catch((error) => next(error));
 });
 
-app.use(unknownEndpoint)
-app.use(errorHandler)
+app.use(unknownEndpoint);
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
