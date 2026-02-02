@@ -35,8 +35,6 @@ const unknownEndpoint = (req, res) => {
   res.status(404).send({ error: 'unknown endpoint' })
 }
 
-app.use(unknownEndpoint)
-
 const errorHandler = (error, req, res, next) => {
   console.error(error.message)
 
@@ -46,8 +44,6 @@ const errorHandler = (error, req, res, next) => {
 
   next(error)
 }
-
-app.use(errorHandler)
 
 app.get("/api/persons", (req, res) => {
   Contact.find({}).then((person) => res.json(person));
@@ -106,6 +102,9 @@ app.delete("/api/persons/:id", (req, res, next) => {
     .then((result) => res.status(204).end())
     .catch((error) => next(error));
 });
+
+app.use(unknownEndpoint)
+app.use(errorHandler)
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
