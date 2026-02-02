@@ -31,46 +31,38 @@ app.use(
   )
 );
 
-// contacts = [
-//   {
-//     id: "1",
-//     name: "Arto Hellas",
-//     number: "040-123456",
-//   },
-//   {
-//     id: "2",
-//     name: "Ada Lovelace",
-//     number: "39-44-5323523",
-//   },
-//   {
-//     id: "3",
-//     name: "Dan Abramov",
-//     number: "12-43-234345",
-//   },
-//   {
-//     id: "4",
-//     name: "Mary Poppendieck",
-//     number: "39-23-6423122",
-//   },
-// ];
+const unknownEndpoint = (req, res) => {
+  res.status(404).send({ error: 'unknown endpoint' })
+}
+
+app.use(unknownEndpoint)
+
+const errorHandler = (error, req, res, next) => {
+  console.error(error.message)
+
+  if (error.name === 'CastError') {
+    return res.status(400).send({ error: 'malformatted id' })
+  } 
+
+  next(error)
+}
+
+app.use(errorHandler)
 
 app.get("/api/persons", (req, res) => {
   Contact.find({}).then((person) => res.json(person));
 });
 
-app.get("/api/persons/:id", (req, res) => {
+app.get("/api/persons/:id", (req, res, next) => {
   Contact.findById(req.params.id)
-  .then(contact => {
-    if (contact) {
-      res.json(contact)
-    } else {
-      res.status(404).end()
-    }
-  })
-  .catch(error => {
-    console.log(error)
-    res.status(500).end()
-  })
+    .then((contact) => {
+      if (contact) {
+        res.json(contact);
+      } else {
+        res.status(404).end();
+      }
+    })
+    .catch((error) => next(error));
 });
 
 app.get("/info", (req, res) => {
@@ -98,14 +90,18 @@ app.post("/api/persons", (req, res) => {
   });
 });
 
-app.put("/api/persons/:id", (req,res)=>{
-  Contact.findByIdAndUpdate(req.params.id, {number: req.body.number},{new: true}).then(result=>{
-    res.json(result)
+app.put("/api/persons/:id", (req, res) => {
+  Contact.findByIdAndUpdate(
+    req.params.id,
+    { number: req.body.number },
+    { new: true }
+  ).then((result) => {
+    res.json(result);
     console.log(result);
-  })
-})
+  });
+});
 
-app.delete("/api/persons/:id", (req, res) => {
+app.delete("/api/persons/:id", (req, res, next) => {
   Contact.findByIdAndDelete(req.params.id)
     .then((result) => res.status(204).end())
     .catch((error) => next(error));
